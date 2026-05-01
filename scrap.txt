@@ -1,0 +1,18 @@
+# Health check
+curl -i http://localhost:5001/health | jq
+
+# Create a job
+curl -i -X POST http://localhost:5001/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"text": "The quick brown fox jumps over the lazy dog and the fox ran away"}' | jq
+
+# Check job status (replace <job_id> with the id returned above)
+curl -s http://localhost:5001/jobs/<job_id> | jq
+
+# Poll until complete (replace <job_id>)
+watch -n 1 "curl -s http://localhost:5001/jobs/<job_id> | jq"
+
+# Trigger the expected-failure case (all stopwords)
+curl -s -X POST http://localhost:5001/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"text": "the and a or but"}' | jq
