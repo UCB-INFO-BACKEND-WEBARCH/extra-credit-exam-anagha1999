@@ -13,6 +13,26 @@ curl -s http://localhost:5001/jobs/<job_id> | jq
 watch -n 1 "curl -s http://localhost:5001/jobs/<job_id> | jq"
 
 # Trigger the expected-failure case (all stopwords)
-curl -s -X POST http://localhost:5001/jobs \
+curl -i -X POST http://localhost:5001/jobs \
   -H "Content-Type: application/json" \
   -d '{"text": "the and a or but"}' | jq
+
+
+  -----
+
+
+docker-compose exec db psql -U pipeline -d pipeline
+-- See all jobs
+SELECT * FROM jobs;
+
+-- See top words
+SELECT * FROM top_words;
+
+-- See top words joined with job status
+SELECT j.id, j.status, j.current_stage, t.word, t.count
+FROM jobs j
+LEFT JOIN top_words t ON t.job_id = j.id
+ORDER BY j.created_at, t.count DESC;
+
+-- Quit
+\q
